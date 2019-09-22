@@ -1,0 +1,5 @@
+.dockerignore
+Dockerfile
+sessions/
+node_modules/
+yarn.lock

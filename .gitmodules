@@ -1,0 +1,3 @@
+[submodule "ctf-browser-visitor"]
+	path = ctf-browser-visitor
+	url = git@github.com:osirislab/ctf-browser-visitor.git

@@ -1,0 +1,2 @@
+// Cmon why do bots keep reporting my site as insecure! Go away stupid bots
+package.json

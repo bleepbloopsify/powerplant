@@ -1,0 +1,74 @@
+version: '3'
+
+# .env is where all the envvars are
+
+services:
+  webserver:
+    build:
+      context: ./server
+    ports:
+      - 8000:8000
+    
+    environment:
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_KEY=${ADMIN_KEY}
+      - REPORT_KEY=${REPORT_KEY}
+      - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}    
+    volumes:
+      - .data/reports:/reports
+      - .data/admin:/admin:ro
+      - .data/sessions:/opt/sessions
+
+  reporter:
+    depends_on:
+      - webserver
+      - xssbot
+
+    build:
+      context: ./reporter
+    
+    environment:
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_KEY=${ADMIN_KEY}
+    
+    volumes:
+      - .data/reports:/reports
+  
+  strange:
+    build:
+      context: ./strange
+      args:
+        ADMIN_KEY: \"${ADMIN_KEY}\"
+        flag: ${FLAG}
+
+    environment:
+      - ADMIN_KEY=${ADMIN_KEY}
+
+    volumes:
+      - .data/admin:/admin
+    
+    ports:
+      - 7331:7331
+
+  solver:
+    depends_on:
+      - webserver
+      - strange
+      - xssbot
+    build:
+      context: ./solver
+
+    environment:
+      - REMOTE_URI=webserver
+      - PWN_URI=strange
+      - FLAG=${FLAG}
+      - TERM=linux
+      - TERMINFO=/etc/terminfo
+  
+  xssbot:
+    build:
+      context: ./ctf-browser-visitor
+    environment:
+     - PYTHONUNBUFFERED=1
